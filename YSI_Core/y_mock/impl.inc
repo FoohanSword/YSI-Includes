@@ -59,14 +59,42 @@ enum E_MOCK_PLAYER
 	E_WANTED_LEVEL,
 	E_RCON_ADMIN,
 	E_DIALOG[E_MOCK_DIALOG],
+	E_PING,
+	E_IP[16 + 1],
+	E_VERSION[32 + 1]
 }
 
 static 
 	MockPlayer[MAX_PLAYERS][E_MOCK_PLAYER]
 ;
 
+stock Y_MOCK_GetWeaponSlot(weaponid)
+{
+	new slot;
+	switch (weaponid)
+	{
+		case 0,1: slot = 0;
+		case 2 .. 9: slot = 1;
+		case 10 .. 15: slot = 10;
+		case 16 .. 18, 39: slot = 8;
+		case 22 .. 24: slot =2;
+		case 25 .. 27: slot = 3;
+		case 28, 29, 32: slot = 4;
+		case 30, 31: slot = 5;
+		case 33, 34: slot = 6;
+		case 35 .. 38: slot = 7;
+		case 40: slot = 12;
+		case 41 .. 43: slot = 9;
+		case 44 .. 46: slot = 11;
+	}
+
+	return slot;
+}
+
 stock Y_MOCK_IsPlayerConnected(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_CONNECTED];
 }
 
@@ -187,8 +215,10 @@ stock Y_MOCK_GetPlayerPos(playerid, &Float:x, &Float:y, &Float:z)
 #endif
 #define GetPlayerPos Y_MOCK_GetPlayerPos
 
-stock Y_MOCK_GetPlayerVirtualWorld()
+stock Y_MOCK_GetPlayerVirtualWorld(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_VIRTUAL_WORLD];
 }
 
@@ -217,6 +247,8 @@ stock Y_MOCK_SetPlayerVirtualWorld(playerid, worldid)
 
 stock Y_MOCK_GetPlayerInterior(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_INTERIOR];
 }
 
@@ -236,8 +268,17 @@ stock Y_MOCK_SetPlayerInterior(playerid, interiorid)
 	return 1;
 }
 
-stock Y_MOCK_GetPlayerSkin()
+#if defined _ALS_SetPlayerInterior
+	#undef SetPlayerInterior
+#else
+	#define _ALS_SetPlayerInterior
+#endif
+#define SetPlayerInterior Y_MOCK_SetPlayerInterior
+
+stock Y_MOCK_GetPlayerSkin(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_SKIN];
 }
 
@@ -268,8 +309,10 @@ stock Y_MOCK_SetPlayerSkin(playerid, skinid)
 #endif
 #define SetPlayerSkin Y_MOCK_SetPlayerSkin
 
-stock Y_MOCK_GetPlayerSpecialAction()
+stock Y_MOCK_GetPlayerSpecialAction(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_SPECIAL_ACTION];
 }
 
@@ -300,8 +343,10 @@ stock Y_MOCK_SetPlayerSpecialAction(playerid, actionid)
 #endif
 #define SetPlayerSpecialAction Y_MOCK_SetPlayerSpecialAction
 
-stock Y_MOCK_GetPlayerScore()
+stock Y_MOCK_GetPlayerScore(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_SCORE];
 }
 
@@ -330,6 +375,8 @@ stock Y_MOCK_SetPlayerScore(playerid, score)
 
 stock Y_MOCK_GetPlayerMoney(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_MONEY];
 }
 
@@ -358,6 +405,8 @@ stock Y_MOCK_GivePlayerMoney(playerid, money)
 
 stock Y_MOCK_GetPlayerState(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_STATE];
 }
 
@@ -409,8 +458,17 @@ stock Y_MOCK_SetPlayerIp(playerid, const ip[])
 	return 1;
 }
 
+#if defined _ALS_SetPlayerIp
+	#undef SetPlayerIp
+#else
+	#define _ALS_SetPlayerIp
+#endif
+#define SetPlayerIp Y_MOCK_SetPlayerIp
+
 stock Y_MOCK_GetPlayerPing(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_PING];
 }
 
@@ -458,7 +516,7 @@ stock Y_MOCK_SetPlayerVersion(playerid, const version[])
 	strcpy(MockPlayer[playerid][E_VERSION], version);
 
 	return 1;
-362}
+}
 
 #if defined _ALS_SetPlayerVersion
 	#undef SetPlayerVersion
@@ -469,6 +527,8 @@ stock Y_MOCK_SetPlayerVersion(playerid, const version[])
 
 stock Y_MOCK_GetPlayerAmmo(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_AMMO][MockPlayer[playerid][E_CURRENT_WEAPON]];
 }
 
@@ -486,7 +546,8 @@ stock Y_MOCK_SetPlayerAmmo(playerid, weaponid, ammo)
 	if (1 < weaponid <= 43 || weaponid == 46 || weaponid == 49 || 53 <= weaponid <= 54) {
 		for (new i = 0; i != MAX_WEAPONS; ++i) {
 			if (MockPlayer[playerid][E_WEAPON][i] == weaponid) {
-				MockPlayer[playerid][E_WEAPON][i] = ammo;
+				MockPlayer[playerid][E_AMMO][i] = ammo;
+				break;
 			}
 		}
 	}
@@ -533,6 +594,8 @@ stock Y_MOCK_SetPlayerArmour(playerid, Float:armour)
 
 stock Y_MOCK_GetPlayerColor(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return 0;
+
 	return MockPlayer[playerid][E_COLOR];
 }
 
@@ -561,6 +624,8 @@ stock Y_MOCK_SetPlayerColor(playerid, color)
 
 stock Y_MOCK_GetPlayerVehicleID(playerid)
 {
+	if (playerid == INVALID_PLAYER_ID) return INVALID_VEHICLE_ID;
+
 	return MockPlayer[playerid][E_VEHICLE_ID];
 }
 
@@ -573,6 +638,8 @@ stock Y_MOCK_GetPlayerVehicleID(playerid)
 
 stock Y_MOCK_GetPlayerTeam(playerid)
 {
+	if (!IsPlayerConnected(playerid)) return -1;
+
 	return MockPlayer[playerid][E_TEAM];
 }
 
@@ -672,7 +739,7 @@ stock Y_MOCK_GetPlayerWeapon(playerid)
 {
 	if (!IsPlayerConnected(playerid)) return -1;
 
-	return MockPlayer[playerid][E_CURRENT_WEAPON];
+	return MockPlayer[playerid][E_WEAPON][MockPlayer[playerid][E_CURRENT_WEAPON]];
 }
 
 #if defined _ALS_GetPlayerWeapon
@@ -689,6 +756,7 @@ stock Y_MOCK_SetPlayerArmedWeapon(playerid, weaponid)
 	for (new i = 0; i != MAX_WEAPONS; ++i) {
 		if (MockPlayer[playerid][E_WEAPON][i] == weaponid) {
 			MockPlayer[playerid][E_CURRENT_WEAPON] = i;
+			break;
 		}
 	}
 
@@ -701,6 +769,27 @@ stock Y_MOCK_SetPlayerArmedWeapon(playerid, weaponid)
 	#define _ALS_SetPlayerArmedWeapon
 #endif
 #define SetPlayerArmedWeapon Y_MOCK_SetPlayerArmedWeapon
+
+stock Y_MOCK_GivePlayerWeapon(playerid, weaponid, ammo)
+{
+	if (!IsPlayerConnected(playerid)) return 0;
+
+	if (!(0 < weaponid <= 46)) return 1;
+
+	new slot = Y_MOCK_GetWeaponSlot(weaponid);
+	MockPlayer[playerid][E_CURRENT_WEAPON] = slot;
+	MockPlayer[playerid][E_WEAPON][slot] = weaponid;
+	MockPlayer[playerid][E_AMMO][slot] = ammo;
+
+	return 1;
+}
+
+#if defined _ALS_GivePlayerWeapon
+	#undef GivePlayerWeapon
+#else
+	#define _ALS_GivePlayerWeapon
+#endif
+#define GivePlayerWeapon Y_MOCK_GivePlayerWeapon
 
 /*
 #if defined _ALS_GetPlayerAnimationIndex
@@ -913,6 +1002,22 @@ stock Y_MOCK_IsPlayerAdmin(playerid)
 #endif
 #define IsPlayerAdmin Y_MOCK_IsPlayerAdmin
 
+stock Y_MOCK_TogglePlayerAdmin(playerid, bool:toggle)
+{
+	if (!IsPlayerConnected(playerid)) return 0;
+
+	MockPlayer[playerid][E_RCON_ADMIN] = toggle;	
+
+	return 1;
+}
+
+#if defined _ALS_TogglePlayerAdmin
+	#undef TogglePlayerAdmin
+#else
+	#define _ALS_TogglePlayerAdmin
+#endif
+#define TogglePlayerAdmin Y_MOCK_TogglePlayerAdmin
+
 stock Y_MOCK_IsPlayerInAnyVehicle(playerid)
 {
 	if (!IsPlayerConnected(playerid)) return 0;
@@ -979,14 +1084,14 @@ stock Y_MOCK_ShowPlayerDialog(playerid, dialogid, style, const caption[], const 
 #endif
 #define ShowPlayerDialog Y_MOCK_ShowPlayerDialog
 
-stock Y_MOCK_GetPlayerDialog(playerid, &dialogid, &style, caption[], info[], button1[], button2[])
+stock Y_MOCK_GetPlayerDialog(playerid, &dialogid, &style, caption[], info[], button1[], button2[], len1 = sizeof caption, len2 = sizeof info, len3 = sizeof button1, len4 = sizeof button2)
 {
 	dialogid = MockPlayer[playerid][E_DIALOG][E_DIALOG_ID];
 	style = MockPlayer[playerid][E_DIALOG][E_DIALOG_STYLE];
-	strcpy(caption, MockPlayer[playerid][E_DIALOG][E_DIALOG_CAPTION]);
-	strcpy(info, MockPlayer[playerid][E_DIALOG][E_DIALOG_INFO]);
-	strcpy(button1, MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON1]);
-	strcpy(button2, MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON2]);
+	strcpy(caption, MockPlayer[playerid][E_DIALOG][E_DIALOG_CAPTION], len1);
+	strcpy(info, MockPlayer[playerid][E_DIALOG][E_DIALOG_INFO], len2);
+	strcpy(button1, MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON1], len3);
+	strcpy(button2, MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON2], len4);
 
 	return 1;
 }
@@ -1004,10 +1109,11 @@ stock CreatePlayer(playerid, const name[])
 	MockPlayer[playerid][E_CONNECTED] = true;
 	MockPlayer[playerid][E_VEHICLE_ID] = INVALID_VEHICLE_ID;
 	MockPlayer[playerid][E_SPECTATING_PLAYER] = INVALID_PLAYER_ID;
-	MockPlayer[playerid][E_SKIN] = 1;
+	MockPlayer[playerid][E_SKIN] = 0;
 	MockPlayer[playerid][E_SURFING_OBJECT_ID] = INVALID_OBJECT_ID;
 	MockPlayer[playerid][E_SURFING_VEHICLE_ID] = INVALID_VEHICLE_ID;
 	MockPlayer[playerid][E_STATE] = PLAYER_STATE_ONFOOT;
+	strcpy(MockPlayer[playerid][E_IP], "127.0.0.1");
 
 	return SetPlayerName(playerid, name);
 }
@@ -1015,4 +1121,17 @@ stock CreatePlayer(playerid, const name[])
 stock DeletePlayer(playerid)
 {
 	memset(MockPlayer[playerid][E_MOCK_PLAYER:0], 0, _:E_MOCK_PLAYER);
+}
+
+
+hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+{
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_ID] = -1;
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_STYLE] = -1;
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_CAPTION][0] = EOS;
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_INFO][0] = EOS;
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON1][0] = EOS;
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON2][0] = EOS;
+
+	return 1;
 }
