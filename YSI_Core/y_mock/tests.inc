@@ -266,3 +266,22 @@ Test:y_mock_PlayerWeapon()
 
 	ASSERT(GetPlayerAmmo(CONNECTED_USER_ID) == 200);
 }
+
+Test:y_mock_PlayerMessages()
+{
+	new msg[144 + 1];
+	GetClientMessage(CONNECTED_USER_ID, 0, msg);
+
+	ASSERT(msg[0] == EOS);
+
+	SendClientMessage(CONNECTED_USER_ID, -1, "Welcome to hell");
+	SendClientMessage(CONNECTED_USER_ID, -1, "You will have fun here");
+	GetClientMessage(CONNECTED_USER_ID, 0, msg);
+
+	ASSERT(!isnull(msg));
+	ASSERT(!strcmp("You will have fun here", msg));
+
+	GetClientMessage(CONNECTED_USER_ID, 1, msg);
+	ASSERT(!isnull(msg));
+	ASSERT(!strcmp("Welcome to hell", msg));
+}

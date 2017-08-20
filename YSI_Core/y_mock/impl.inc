@@ -1,6 +1,7 @@
 #define CRASH_VALUE cellmax
 
 #define MAX_WEAPONS 13
+#define MAX_MOCK_CLIENT_MESSAGES 10
 
 enum E_MOCK_DIALOG {
 	E_DIALOG_ID,
@@ -65,7 +66,8 @@ enum E_MOCK_PLAYER
 }
 
 static 
-	MockPlayer[MAX_PLAYERS][E_MOCK_PLAYER]
+	MockPlayer[MAX_PLAYERS][E_MOCK_PLAYER],
+	MockMessages[MAX_PLAYERS][MAX_MOCK_CLIENT_MESSAGES][144 + 1]
 ;
 
 stock Y_MOCK_GetWeaponSlot(weaponid)
@@ -1102,6 +1104,38 @@ stock Y_MOCK_GetPlayerDialog(playerid, &dialogid, &style, caption[], info[], but
 	#define _ALS_GetPlayerDialog
 #endif
 #define GetPlayerDialog Y_MOCK_GetPlayerDialog
+
+stock Y_MOCK_SendClientMessage(playerid, color, const message[])
+{
+	#pragma unused color
+
+	if (!IsPlayerConnected(playerid)) return 0;
+
+	for (new i = MAX_MOCK_CLIENT_MESSAGES - 2; i != 0; --i) {
+		strcpy(MockMessages[playerid][i], MockMessages[playerid][i + 1]);
+	}
+
+	strcpy(MockMessages[playerid][0], message);
+
+	return 1;
+}
+
+#if defined _ALS_SendClientMessage
+	#undef SendClientMessage
+#else
+	#define _ALS_SendClientMessage
+#endif
+#define SendClientMessage Y_MOCK_SendClientMessage
+
+stock GetClientMessage(playerid, index, dest[], len = sizeof dest)
+{
+	if (!IsPlayerConnected(playerid)) return 0;
+	if (!(0 <= index < MAX_MOCK_CLIENT_MESSAGES)) return 0;
+
+	strcpy(dest, MockMessages[playerid][index], len);
+
+	return 1;
+}
 
 stock CreatePlayer(playerid, const name[])
 {
