@@ -8,8 +8,9 @@
 
 #include "y_mock/impl"
 
-// #if defined YSI_TESTS
+#if defined YSI_TESTS
+	#pragma dynamic 20000
 	#include "..\YSI_Core\y_testing"
 	#include "y_mock/tests"
-// #endif
+#endif
 

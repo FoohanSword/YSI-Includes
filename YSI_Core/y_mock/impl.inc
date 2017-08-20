@@ -2,6 +2,15 @@
 
 #define MAX_WEAPONS 13
 
+enum E_MOCK_DIALOG {
+	E_DIALOG_ID,
+	E_DIALOG_STYLE,
+	E_DIALOG_CAPTION[64 + 1],
+	E_DIALOG_INFO[4096 + 1],
+	E_DIALOG_BUTTON1[32],
+	E_DIALOG_BUTTON2[32]
+}
+
 enum E_MOCK_PLAYER
 {
 	bool:E_CONNECTED,
@@ -49,7 +58,7 @@ enum E_MOCK_PLAYER
 	Float:E_VELOCITY[3],
 	E_WANTED_LEVEL,
 	E_RCON_ADMIN,
-	E_PLAYER_STATE
+	E_DIALOG[E_MOCK_DIALOG],
 }
 
 static 
@@ -347,7 +356,7 @@ stock Y_MOCK_GivePlayerMoney(playerid, money)
 #endif
 #define GivePlayerMoney Y_MOCK_GivePlayerMoney
 
-stock Y_MOCK_GetPlayerState()
+stock Y_MOCK_GetPlayerState(playerid)
 {
 	return MockPlayer[playerid][E_STATE];
 }
@@ -449,7 +458,7 @@ stock Y_MOCK_SetPlayerVersion(playerid, const version[])
 	strcpy(MockPlayer[playerid][E_VERSION], version);
 
 	return 1;
-}
+362}
 
 #if defined _ALS_SetPlayerVersion
 	#undef SetPlayerVersion
@@ -510,7 +519,9 @@ stock Y_MOCK_SetPlayerArmour(playerid, Float:armour)
 {
 	if (!IsPlayerConnected(playerid)) return 0;
 
-	return floatround(MockPlayer[playerid][E_ARMOUR]);
+	MockPlayer[playerid][E_ARMOUR] = armour;
+
+	return 1;
 }
 
 #if defined _ALS_SetPlayerArmour
@@ -548,7 +559,7 @@ stock Y_MOCK_SetPlayerColor(playerid, color)
 #endif
 #define SetPlayerColor Y_MOCK_SetPlayerColor
 
-stock Y_MOCK_GetPlayerVehicleID(playerid, vehicleid)
+stock Y_MOCK_GetPlayerVehicleID(playerid)
 {
 	return MockPlayer[playerid][E_VEHICLE_ID];
 }
@@ -612,9 +623,9 @@ stock Y_MOCK_PutPlayerInVehicle(playerid, vehicleid, seatid)
 	MockPlayer[playerid][E_VEHICLE_SEAT] = seatid;	
 
 	if (seatid == 0) {
-		MockPlayer[playerid][E_PLAYER_STATE] = PLAYER_STATE_DRIVER;
+		MockPlayer[playerid][E_STATE] = PLAYER_STATE_DRIVER;
 	} else {
-		MockPlayer[playerid][E_PLAYER_STATE] = PLAYER_STATE_PASSENGER;		
+		MockPlayer[playerid][E_STATE] = PLAYER_STATE_PASSENGER;		
 	}
 
 	return 1;
@@ -935,7 +946,7 @@ stock Y_MOCK_RemovePlayerFromVehicle(playerid)
 	if (!IsPlayerConnected(playerid)) return 0;
 
 	MockPlayer[playerid][E_VEHICLE_ID] = INVALID_VEHICLE_ID;
-	MockPlayer[playerid][E_PLAYER_STATE] = PLAYER_STATE_ONFOOT;
+	MockPlayer[playerid][E_STATE] = PLAYER_STATE_ONFOOT;
 
 	return 1;
 }
@@ -947,6 +958,46 @@ stock Y_MOCK_RemovePlayerFromVehicle(playerid)
 #endif
 #define RemovePlayerFromVehicle Y_MOCK_RemovePlayerFromVehicle
 
+stock Y_MOCK_ShowPlayerDialog(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[])
+{
+	if (!IsPlayerConnected(playerid)) return 0;
+
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_ID] = dialogid;
+	MockPlayer[playerid][E_DIALOG][E_DIALOG_STYLE] = style;
+	strcpy(MockPlayer[playerid][E_DIALOG][E_DIALOG_CAPTION], caption);
+	strcpy(MockPlayer[playerid][E_DIALOG][E_DIALOG_INFO], info);
+	strcpy(MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON1], button1);
+	strcpy(MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON2], button2);
+
+	return 1;
+}
+
+#if defined _ALS_ShowPlayerDialog
+	#undef ShowPlayerDialog
+#else
+	#define _ALS_ShowPlayerDialog
+#endif
+#define ShowPlayerDialog Y_MOCK_ShowPlayerDialog
+
+stock Y_MOCK_GetPlayerDialog(playerid, &dialogid, &style, caption[], info[], button1[], button2[])
+{
+	dialogid = MockPlayer[playerid][E_DIALOG][E_DIALOG_ID];
+	style = MockPlayer[playerid][E_DIALOG][E_DIALOG_STYLE];
+	strcpy(caption, MockPlayer[playerid][E_DIALOG][E_DIALOG_CAPTION]);
+	strcpy(info, MockPlayer[playerid][E_DIALOG][E_DIALOG_INFO]);
+	strcpy(button1, MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON1]);
+	strcpy(button2, MockPlayer[playerid][E_DIALOG][E_DIALOG_BUTTON2]);
+
+	return 1;
+}
+
+#if defined _ALS_GetPlayerDialog
+	#undef GetPlayerDialog
+#else
+	#define _ALS_GetPlayerDialog
+#endif
+#define GetPlayerDialog Y_MOCK_GetPlayerDialog
+
 stock CreatePlayer(playerid, const name[])
 {
 	memset(MockPlayer[playerid][E_MOCK_PLAYER:0], 0, _:E_MOCK_PLAYER);
@@ -956,7 +1007,7 @@ stock CreatePlayer(playerid, const name[])
 	MockPlayer[playerid][E_SKIN] = 1;
 	MockPlayer[playerid][E_SURFING_OBJECT_ID] = INVALID_OBJECT_ID;
 	MockPlayer[playerid][E_SURFING_VEHICLE_ID] = INVALID_VEHICLE_ID;
-	MockPlayer[playerid][E_PLAYER_STATE] = PLAYER_STATE_ONFOOT;
+	MockPlayer[playerid][E_STATE] = PLAYER_STATE_ONFOOT;
 
 	return SetPlayerName(playerid, name);
 }
