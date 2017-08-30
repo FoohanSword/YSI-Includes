@@ -97,25 +97,6 @@ Test:y_groups_GetColour()
 	Group_Destroy(g);
 }
 
-Test:y_groups_Set1()
-{
-	new
-		Group:g = Group_Create("Group 7");
-	ASSERT(Group_GetCount(g) == 0);
-	Group_SetPlayer(g, 42, true);
-	ASSERT_TRUE(Group_GetPlayer(g, 42));
-	ASSERT(Group_GetCount(g) == 1);
-	new
-		c = 0;
-	foreach (new p : GroupMember[g])
-	{
-		ASSERT(p == 42);
-		++c;
-	}
-	ASSERT(c == 1);
-	Group_Destroy(g);
-}
-
 Test:y_groups_Set2()
 {
 	new
@@ -870,32 +851,6 @@ Test:y_groups_ChildIterator1()
 	{
 		Group_Destroy(g);
 	}
-	ASSERT(Group_IsValid(g0));
-	ASSERT(!Group_IsValid(g1));
-	ASSERT(!Group_IsValid(g2));
-	Group_Destroy(g0),
-	ASSERT(!Group_IsValid(g0));
-}
-
-Test:y_groups_ChildIterator2()
-{
-	new
-		Group:g0 = Group_Create(),
-		Group:g1 = Group_Create(),
-		Group:g2 = Group_Create();
-	Group_AddChild(g0, g1);
-	Group_AddChild(g0, g2);
-	ASSERT(Group_IsValid(g0));
-	ASSERT(Group_IsValid(g1));
-	ASSERT(Group_IsValid(g2));
-	new
-		total = 0;
-	foreach (new Group:g : GroupChild[g0])
-	{
-		Group_Destroy(g);
-		++total;
-	}
-	ASSERT(total == 2);
 	ASSERT(Group_IsValid(g0));
 	ASSERT(!Group_IsValid(g1));
 	ASSERT(!Group_IsValid(g2));
